@@ -61,7 +61,26 @@ router.delete('/:categoryId', async(req, res) => {
   }
 })
 
+//get a single category by it's id
+router.get('/:id', async (req, res) => {
 
+  try {
+    const category = await Category.findById(req.params.id)
+
+    if(category) {
+      res.json(category)
+    } else {
+      res.status(404).json({
+        error: 'Category not found'
+      })
+    }
+  } catch (error) {
+    res.json({
+      error: error
+    })
+  }
+
+})
 
 
 
