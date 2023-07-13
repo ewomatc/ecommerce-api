@@ -82,7 +82,32 @@ router.get('/:id', async (req, res) => {
 
 })
 
+//update a category
+router.put('/:id', async (req, res) => {
 
+  try {
+    const category = await Category.findByIdAndUpdate(req.params.id, {
+      name: req.body.name,
+      icon: req.body.icon,
+      color: req.body.color
+    },
+    {
+      new: true
+    })
+
+    if (category) {
+      res.json(category)
+    } else {
+      res.status(400).json({
+        error: 'could not update catagory'
+      })
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: error
+    })
+  }
+})
 
 
 
