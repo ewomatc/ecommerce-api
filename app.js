@@ -1,5 +1,6 @@
 const express = require('express')
 require('dotenv/config')
+const cors = require('cors')
 const  bodyParser = require('body-parser')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
@@ -7,6 +8,10 @@ const Product = require('./models/product')
 const api = process.env.API_URL
 
 const app = express()
+
+//load cross origin resource sharing
+app.use(cors()) 
+app.options('*', cors()) //use cors on all http options i.e: GET, PUT, etc.
 
 //import routers
 const productsRouter = require('./routers/productRouter')

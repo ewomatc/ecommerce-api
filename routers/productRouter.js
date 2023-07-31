@@ -50,9 +50,8 @@ router.post(`/`, async(req, res) => {
       isFeatured: body.isFeatured
     })
 
-    if (product) {
-      await product.save()
-
+    const savedProduct = await product.save()
+    if (savedProduct) {
       res.status(201).json(product)
     } else {
       res.status(400).json({
@@ -60,7 +59,7 @@ router.post(`/`, async(req, res) => {
       })
     }
   } catch (error) {
-    res.json({
+    res.status(500).json({
       error: error.message
     })
   }

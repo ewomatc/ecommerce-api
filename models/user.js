@@ -1,9 +1,34 @@
 const mongoose = require('mongoose')
 
 const userSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  password: String
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  passwordHash: {
+    type: String,
+    required: true
+  },
+  phone: {
+    type: Number,
+    required: true
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
+  city: {
+    type: String,
+    required: true
+  },
+  country: {
+    type: String,
+    required: true
+  }
 })
 
 userSchema.virtual('id').get(function () {
