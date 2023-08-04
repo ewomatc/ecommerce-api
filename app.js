@@ -1,4 +1,5 @@
 const express = require('express')
+const app = express()
 require('dotenv/config')
 const cors = require('cors')
 const  bodyParser = require('body-parser')
@@ -6,8 +7,7 @@ const morgan = require('morgan')
 const mongoose = require('mongoose')
 const Product = require('./models/product')
 const api = process.env.API_URL
-
-const app = express()
+const verifyToken = require('./middlewares/auth')
 
 //load cross origin resource sharing
 app.use(cors()) 
@@ -19,9 +19,10 @@ const userRouter = require('./routers/userRouter')
 const orderRouter = require('./routers/orderRouter')
 const categoryRouter = require('./routers/categoryRouter')
 
-//middleware
+//load middlewares
 app.use(bodyParser.json())
 app.use(morgan('tiny'))
+app.use(verifyToken())
 
 //Routers
 app.use(`${api}/products`, productsRouter)

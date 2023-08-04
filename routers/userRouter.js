@@ -1,10 +1,12 @@
+require('dotenv').config()
 const {User} = require('../models/user')
 const router = require('express').Router()
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 //get all users
 router.get('/', async(req, res) => {
   try {
-    const usersList = await User.find()
+    const usersList = await User.find().select('-passwordHash')
 
     if (usersList.length > 0) {
       res.status(200).json(usersList)
@@ -18,9 +20,42 @@ router.get('/', async(req, res) => {
   }
 })
 
-//add a new user
-router.post('/', async (req, res) => {
+
+//get a single user by id
+router.get('/:id', async(req, res) => {
   try {
+    const user = await User.findById(req.params.id).select('-passwordHash')
+
+    if(user) {
+      res.status(200).json({
+        success: true,
+        message: 'user found',
+        user: user
+      })
+    } else {
+      res.status(404).json({
+        error: 'user not found'
+      })
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: error
+    })
+  }
+})
+
+//add a new user
+router.post('/register', async (req, res) => {
+  try {
+    //check if the user with this email is already registered
+    const userExists = await User.findOne({email: req.body.email})
+    if (userExists) {
+      return res.status(409).json({
+        error: 'User with this email already exists'
+      })
+    }
+
+    // create and save new user
     const user = new User({
       name: req.body.name,
       email: req.body.email,
@@ -50,7 +85,36 @@ router.post('/', async (req, res) => {
 })
 
   
+//login a user
+router.post('/login', async(req, res) => {
+  //find the user by email to see if they're registered
+  try {
+    const user = await User.findOne({ email: req.body.email})
 
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized, user with email does not exist'})
+    }
+
+    // if the user exists, compare password input with hashed one in db
+    const passwordMatch = await bcrypt.compareSync(req.body.password, user.passwordHash)
+
+    if( !passwordMatch ) {
+      return res.status(401).json({ error: 'Incorrect password' })
+    }
+
+    // if the passwords are a match, load json web token for the user and log them
+
+    const token = jwt.sign({ userId: user._id, email: user.email }, process.env.SECRET, { expiresIn: '1d' })
+    
+    return res.status(200).json({ message: 'Login successful ', token: token })
+
+  } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error'
+    })
+  }
+
+})
 
 
 module.exports = router
