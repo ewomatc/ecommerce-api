@@ -8,6 +8,7 @@ const mongoose = require('mongoose')
 const Product = require('./models/product')
 const api = process.env.API_URL
 const verifyToken = require('./middlewares/auth')
+const errorHandler = require('./middlewares/error-handler')
 
 //load cross origin resource sharing
 app.use(cors()) 
@@ -36,12 +37,12 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   console.log('connected to database...');
 })
 .catch((err) => {
-  console.log('Error connecting to db', err);
+  console.log('Error connecting to db', err.message);
 })
 
 
 
-
+app.use(errorHandler)
 
 app.listen(3000, () => {
   console.log('server started on port 3000');

@@ -102,18 +102,63 @@ router.post('/login', async(req, res) => {
       return res.status(401).json({ error: 'Incorrect password' })
     }
 
-    // if the passwords are a match, load json web token for the user and log them
+    // if the passwords are a match, create token for the user and log them in
 
-    const token = jwt.sign({ userId: user._id, email: user.email }, process.env.SECRET, { expiresIn: '1d' })
+    const token = jwt.sign({ userId: user._id, email: user.email, isAdmin: user.isAdmin }, process.env.SECRET, { expiresIn: '1d' })
     
     return res.status(200).json({ message: 'Login successful ', token: token })
 
   } catch (error) {
     res.status(500).json({
-      error: 'Internal server error'
+      error: error
     })
   }
+})
 
+
+//get a count of total number of users
+router.get('/get/count', async (req, res) => {
+  try {
+    const userCount = await User.countDocuments()
+
+    if (!userCount) {
+      res.status(404).json({
+        error: 'No users found'
+      })
+    } else {
+      res.status(200).json({
+        totalUsers: userCount
+      })
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: error
+    })
+  }
+})
+
+
+//delete a user
+router.delete('/:id', async (req, res) => {
+  try {
+    const userDeleted = await User.findByIdAndDelete(req.params.id)
+
+    if (!userDeleted) {
+      res.status(404).json({
+        error: 'user does not exist'
+      })
+    } else {
+      res.status(204).json({
+        success: true,
+        message: 'user deleted successfully'
+      })
+    }
+  }
+  catch (error) {
+    res.status(500).json({
+      error: error
+    })
+  }
 })
 
 
